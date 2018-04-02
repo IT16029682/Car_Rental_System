@@ -1,0 +1,393 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package newpackage;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import net.proteanit.sql.DbUtils;
+import static newpackage.NewClass.getConnection;
+import static newpackage.Reserve.CIDp;
+
+import net.sf.jasperreports.engine.JRException;
+import static newpackage.IReport.PaymentReport;
+
+
+/**
+ *
+ * @author Kasun
+ */
+public class PayBILL extends javax.swing.JFrame {
+
+    /**
+     * Creates new form PayBILL
+     */
+      Connection connection =null;
+    
+    public PayBILL() throws SQLException {
+       connection =getConnection();
+
+        initComponents();
+    }
+  
+    
+    
+    
+  
+ 
+    
+      public  void conDatabase(){
+            
+        
+          
+           
+        
+
+            // Create and execute a SELECT SQL statement.
+            String selectSql = "SELECT c.CID,r.VID,v.VType,v.Model,v.RegistrationNo,v.CostPerDay,r.NoOfDays,r.Rental " + 
+                    "FROM Reservation r ,Customer c ,Vehicle v " +"WHERE r.CID=c.CID AND r.VID=v.VehicleID AND r.CID="+CIDp + " AND r.PID IS NULL ";
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(selectSql)) {
+
+               
+               
+                jTable1.setModel(DbUtils.resultSetToTableModel(resultSet));
+               
+          
+                
+        }
+        catch (Exception e) {
+            JOptionPane.showMessageDialog(null,"Error");
+
+        }
+    
+    }
+
+   
+      
+      
+
+      public void TotalRental(){
+            
+        
+          
+       
+        
+           
+
+
+            // Create and execute a SELECT SQL statement.
+            String selectSql = "SELECT SUM(Rental)  FROM Reservation " +"WHERE CID="+CIDp + " AND PID IS NULL ";
+
+            try (Statement statement = connection.createStatement();
+                 ResultSet resultSet = statement.executeQuery(selectSql)) {
+
+              
+              
+               while(resultSet.next())
+               {
+                   jTotal.setText(resultSet.getString(1));
+                
+               }
+            }
+        
+        catch (Exception e) {
+                JOptionPane.showMessageDialog(null,"Error");
+
+        }
+    
+    }
+      
+      
+    
+      
+      
+      
+      
+      
+      
+      
+    public  void InsertPaymentDatabase() {
+            
+          
+            // Prepared statement to insert data
+            
+            
+                String insertSql = "declare @PID INT ; INSERT INTO Payment  VALUES (?);  SELECT @PID=SCOPE_IDENTITY(); UPDATE Reservation SET PID=@PID WHERE CID="+CIDp + " AND PID IS NULL "   ;
+                String sql= "SELECT IDENT_CURRENT('Payment') " ;
+               
+                 
+                try (PreparedStatement prep = connection.prepareStatement(insertSql);
+                     Statement statement= connection.createStatement();        ) {
+                        
+                   
+                        prep.setInt(1, Integer.parseInt(jTotal.getText()));
+                      
+  
+                 prep.executeUpdate();
+                 
+                 ResultSet  resultset=statement.executeQuery(sql);
+                    int PID = 0;
+                   while(resultset.next()){
+                    
+                                        PID= resultset.getInt(1);
+                                         
+                                          }
+                   //pass PID TO IReport
+                   IReportPayment(PID);
+                         JOptionPane.showMessageDialog(null,"Payment Complete");
+                        
+        }
+        catch (Exception e) {
+                JOptionPane.showMessageDialog(null,"Payment not Complete");
+
+        }
+    
+    }
+      
+      
+      
+     public  void IReportPayment(int PID)  
+     {
+     
+     
+          HashMap param= new HashMap();
+         
+                 
+         String report="E:\\SLIIT 2d year\\ST2\\graphical f\\JavaTest\\JavaTest\\src\\newpackage\\report\\reportPayment.jasper";
+         param.put("CID", Integer.parseInt(CIDp) );
+         param.put("PaymentID",PID);
+        
+         
+      
+        try {
+            PaymentReport(report,param);
+        } catch (SQLException | JRException ex) {
+           JOptionPane.showMessageDialog(null,"IReport file not founded!");
+        }
+     
+     
+     }
+    
+    
+    
+    
+    
+    
+      
+      
+      
+      
+      
+      
+    
+    
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jTotal = new javax.swing.JLabel();
+        jTotal1 = new javax.swing.JLabel();
+        btnPaymentComplete = new javax.swing.JButton();
+        btnReVCancel = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
+        getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(2, 50, 990, 129));
+
+        jTotal.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
+        getContentPane().add(jTotal, new org.netbeans.lib.awtextra.AbsoluteConstraints(730, 270, 250, 39));
+
+        jTotal1.setFont(new java.awt.Font("Tahoma", 1, 48)); // NOI18N
+        jTotal1.setText("Total=  Rs.  ");
+        getContentPane().add(jTotal1, new org.netbeans.lib.awtextra.AbsoluteConstraints(430, 270, -1, 40));
+
+        btnPaymentComplete.setBackground(new java.awt.Color(153, 0, 0));
+        btnPaymentComplete.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        btnPaymentComplete.setIcon(new javax.swing.ImageIcon(getClass().getResource("/newpackage/images/32/cloud-check.png"))); // NOI18N
+        btnPaymentComplete.setText("Payment Complete");
+        btnPaymentComplete.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        btnPaymentComplete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnPaymentCompleteActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnPaymentComplete, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 210, -1, 39));
+
+        btnReVCancel.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+        btnReVCancel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/newpackage/images/32/cloud-error.png"))); // NOI18N
+        btnReVCancel.setText("Cancel");
+        btnReVCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReVCancelActionPerformed(evt);
+            }
+        });
+        getContentPane().add(btnReVCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 210, 110, -1));
+
+        jPanel1.setBackground(new java.awt.Color(51, 51, 51));
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 990, Short.MAX_VALUE)
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 50, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 990, 50));
+
+        jPanel2.setBackground(new java.awt.Color(51, 51, 51));
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 990, Short.MAX_VALUE)
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 40, Short.MAX_VALUE)
+        );
+
+        getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 360, 990, 40));
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/newpackage/images/background-polygon-lightblue.jpg"))); // NOI18N
+        getContentPane().add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 54, 990, 310));
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+       
+        conDatabase();
+        TotalRental();
+    }//GEN-LAST:event_formWindowOpened
+
+    private void btnPaymentCompleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPaymentCompleteActionPerformed
+         int ReqCancel=JOptionPane.showConfirmDialog(null, "Are You Sure ? ");
+        
+        if(ReqCancel==0)
+        {
+       
+            InsertPaymentDatabase();
+            dispose();
+           
+        
+        }
+    }//GEN-LAST:event_btnPaymentCompleteActionPerformed
+
+    private void btnReVCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReVCancelActionPerformed
+         int ReqCancel=JOptionPane.showConfirmDialog(null, "Are You Sure ? ");
+        Reserve rr;
+        try {
+            rr = new Reserve();
+            if(ReqCancel==0)
+            {
+            rr.FindNullRowRev();
+            rr.CancelReVDatabase();
+            dispose();
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(PayBILL.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }//GEN-LAST:event_btnReVCancelActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(PayBILL.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(PayBILL.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(PayBILL.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(PayBILL.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    new PayBILL().setVisible(true);
+                } catch (SQLException ex) {
+                    Logger.getLogger(PayBILL.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                 
+       
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnPaymentComplete;
+    private javax.swing.JButton btnReVCancel;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JLabel jTotal;
+    private javax.swing.JLabel jTotal1;
+    // End of variables declaration//GEN-END:variables
+}
